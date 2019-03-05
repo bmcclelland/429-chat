@@ -77,5 +77,21 @@ namespace Sockets
             result.Sort(Peer.CompareById);
             return result;
         }
+
+        // Closes the connection with given peer id.
+        // If no such peer, does nothing.
+        public void TerminatePeer(int id)
+        {
+            peerMutex.WaitOne();
+
+            if (peers.ContainsKey(id))
+            {
+                var socket = peers[id];
+                socket.Close();
+                peers.Remove(id);
+            }
+
+            peerMutex.ReleaseMutex();
+        }
     }
 }
