@@ -34,9 +34,6 @@ namespace Sockets
             var callback = new AsyncCallback(OnIncomingConnect);
             listenSocket.BeginAccept(callback, listenSocket);
             Console.WriteLine("Listening");
-
-            while (true)
-            {}
         }
     }
 }
