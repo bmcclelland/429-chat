@@ -85,8 +85,8 @@ namespace Sockets
                             var m = new Regex(@"^connect\s+(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})\s+(\d{1,5})$").Match(line);
                             string address = m.Groups[0].Captures[0].Value;
                             int port = Int32.Parse(m.Groups[1].Captures[0].Value);
-                            peerManager.ConnectPeer(address, port);
                             Console.WriteLine($"connecting to {address}:{port}");
+                            peerManager.ConnectPeer(address, port);
                             break;
                         }
                     case "list":
@@ -109,6 +109,7 @@ namespace Sockets
                             int id = Int32.Parse(m.Groups[1].Captures[0].Value);
                             string msg = m.Groups[2].Captures[0].Value;
                             Console.WriteLine($"sending {msg} to id {id}");
+                            peerManager.SendToPeer(id, msg);
                             break;
                         }
                     case "exit":
