@@ -1,10 +1,36 @@
-﻿namespace Sockets
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Net.Sockets;
+using System.Threading;
+
+namespace Sockets
 {
-    class Program
+    class PeerManager
     {
-        static void Main(string[] args)
+        Mutex peerMutex = new Mutex();
+        List<Socket> peers = new List<Socket>();
+
+        public void AddPeer(Socket peerSocket)
         {
-            Server app = new Server(8000);
+            peerMutex.WaitOne();
+            peers.Add(peerSocket);
+            peerMutex.ReleaseMutex();
+        }
+
+        public void SendToAll(string message)
+        {
+            peerMutex.WaitOne();
+
+            Encoding e = new ASCIIEncoding();
+            Byte[] bytes = e.GetBytes(message);
+
+            foreach (Socket peer in peers)
+            {
+                peer.Send(bytes);
+            }
+
+            peerMutex.ReleaseMutex();
         }
     }
 }
