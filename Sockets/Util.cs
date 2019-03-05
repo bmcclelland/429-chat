@@ -33,31 +33,31 @@ namespace Sockets
             }
         }
 
-        public static string SocketLocalPort(Socket socket)
+        public static int SocketLocalPort(Socket socket)
         {
             var ep = socket.LocalEndPoint as IPEndPoint;
 
             if (ep == null)
             {
-                return "unknown";
+                return 0;
             }
             else
             {
-                return ep.Port.ToString();
+                return ep.Port;
             }
         }
 
-        public static string SocketRemotePort(Socket socket)
+        public static int SocketRemotePort(Socket socket)
         {
             var ep = socket.RemoteEndPoint as IPEndPoint;
 
             if (ep == null)
             {
-                return "unknown";
+                return 0;
             }
             else
             {
-                return ep.Port.ToString();
+                return ep.Port;
             }
         }
     }
