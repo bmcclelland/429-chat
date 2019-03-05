@@ -49,6 +49,13 @@ namespace Sockets
             peer.BeginReceive(new AsyncCallback(OnReceive));
         }
 
+        public void ConnectPeer(string ipaddress, int port)
+        {
+            Socket peer = Util.CreateSocket();
+            peer.Connect(ipaddress, port);
+            AddPeer(peer);
+        }
+
         public void AddPeer(Socket peerSocket)
         {
             peerMutex.WaitOne();

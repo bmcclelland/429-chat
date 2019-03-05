@@ -80,10 +80,13 @@ namespace Sockets
                             Console.WriteLine("Option " + localPort);
                             break;
                         }
-                    case var val when new Regex(@"^connect\s+\d{1,5}$").IsMatch(val):
+                    case var val when new Regex(@"^connect\s+(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})\s+(\d{1,5})$").IsMatch(val):
                         {
-                            string port = Regex.Replace(line, @"connect\s+", "");
-                            Console.WriteLine($"connecting to port: {port}");
+                            var m = new Regex(@"^connect\s+(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})\s+(\d{1,5})$").Match(line);
+                            string address = m.Groups[0].Captures[0].Value;
+                            int port = Int32.Parse(m.Groups[1].Captures[0].Value);
+                            peerManager.ConnectPeer(address, port);
+                            Console.WriteLine($"connecting to {address}:{port}");
                             break;
                         }
                     case "list":
@@ -99,11 +102,12 @@ namespace Sockets
                             Console.WriteLine($"teminating connection {id}");
                             break;
                         }
-                    case var val when new Regex(@"^send\s+(\d{1})\s+([a..zA..Z]+)}$").IsMatch(val):
+                    case var val when new Regex(@"^send\s+(\d{1})\s+(\w+)$").IsMatch(val):
                         {
-                            var m = new Regex(@"^send\s+(\d{1})\s+)\s+([a..zA..Z]+)}$").Match(line);
-                            int id = Int32.Parse(m.Groups[0].Captures[0].Value);
-                            string msg = m.Groups[1].Captures[0].Value;
+                            var m = new Regex(@"^send\s+(\d{1})\s+(\w+)$").Match(line);
+                            //Console.WriteLine(m.Groups[0].Captures[0].Value);
+                            int id = Int32.Parse(m.Groups[1].Captures[0].Value);
+                            string msg = m.Groups[2].Captures[0].Value;
                             Console.WriteLine($"sending {msg} to id {id}");
                             break;
                         }

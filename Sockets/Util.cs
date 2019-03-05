@@ -60,5 +60,14 @@ namespace Sockets
                 return ep.Port;
             }
         }
+
+        public static Socket CreateSocket()
+        {
+            return new Socket
+                    (
+                        AddressFamily.InterNetwork,
+                        SocketType.Stream, ProtocolType.Tcp
+                    );
+        }
     }
 }
