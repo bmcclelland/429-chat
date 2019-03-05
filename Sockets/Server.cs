@@ -7,7 +7,7 @@ namespace Sockets
 {
     class Server
     {
-        PeerManager peers = new PeerManager();
+        PeerManager peerManager = new PeerManager();
         Socket listenSocket;
         int localPort;
         
@@ -21,7 +21,7 @@ namespace Sockets
         {
             Socket peerSocket = listenSocket.EndAccept(result);
             Console.WriteLine("onIncomingConnect " + peerSocket.RemoteEndPoint.ToString());
-            peers.AddPeer(peerSocket);
+            peerManager.AddPeer(peerSocket);
             Console.WriteLine("added peer " + peerSocket.RemoteEndPoint.ToString());
             var callback = new AsyncCallback(OnIncomingConnect);
             listenSocket.BeginAccept(callback, listenSocket);
@@ -37,20 +37,7 @@ namespace Sockets
             listenSocket.BeginAccept(callback, listenSocket);
             Console.WriteLine("Listening");
 
-            Console.WriteLine("Listening on " + IPAddress.Any.ToString() + ":" + localPort);
-
-            for(int i = 0; i < 5; i++)
-            {
-                peers.AddPeer
-                    (
-                    new Socket
-                    (
-                        new IPEndPoint(IPAddress.Parse("192.168.1." + i), (5550+i))
-                        .AddressFamily, SocketType.Stream, ProtocolType.Tcp
-                    )
-                    );
-            }
-            
+            Console.WriteLine("Listening on " + IPAddress.Any.ToString() + ":" + localPort);            
 
             string line = "";
             do
@@ -101,7 +88,8 @@ namespace Sockets
                         }
                     case "list":
                         {
-                            Console.WriteLine(peers.GetPeers());
+                            foreach((int id, string address, int port) in peerManager.GetPeerList())
+                                Console.WriteLine(id + " " + address + " " + port);
                             break;
                         }
                     case var val when new Regex(@"^terminate\s+(\d{1})$").IsMatch(val):

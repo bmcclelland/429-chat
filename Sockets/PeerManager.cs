@@ -84,22 +84,23 @@ namespace Sockets
             return e.GetBytes(s);
         }
 
-        private static int CompareById(Tuple<int,string> a, Tuple<int,string> b)
+        private static int CompareById((int, string, int) a, (int, string, int) b)
         {
             return a.Item1.CompareTo(b.Item1);
         }
 
         // Returns a list of Peers sorted by id.
-        public List<Tuple<int,string>> GetPeerList()
+        public List<(int, string, int)> GetPeerList()
         {
-            List<Tuple<int,string>> result = new List<Tuple<int,string>>();
+            List<(int, string, int)> result = new List<(int, string, int)>();
             peerMutex.WaitOne();
                       
             foreach (var kv in peers)
             {
                 var id = kv.Key;
-                var address = kv.Value.socket.RemoteEndPoint.ToString();
-                result.Add(Tuple.Create(id, address));
+                var address = Util.SocketRemoteIP(kv.Value.socket);
+                var port = Util.SocketRemotePort(kv.Value.socket);
+                result.Add((id, address, port));
             }
 
             peerMutex.ReleaseMutex();
