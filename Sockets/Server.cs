@@ -33,6 +33,10 @@ namespace Sockets
             listenSocket.Listen(10);
             var callback = new AsyncCallback(OnIncomingConnect);
             listenSocket.BeginAccept(callback, listenSocket);
+            Console.WriteLine("Listening");
+
+            while (true)
+            {}
         }
     }
 }
