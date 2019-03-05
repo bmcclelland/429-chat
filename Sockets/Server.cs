@@ -23,6 +23,8 @@ namespace Sockets
             Console.WriteLine("onIncomingConnect " + peerSocket.RemoteEndPoint.ToString());
             peers.AddPeer(peerSocket);
             Console.WriteLine("added peer " + peerSocket.RemoteEndPoint.ToString());
+            var callback = new AsyncCallback(OnIncomingConnect);
+            listenSocket.BeginAccept(callback, listenSocket);
         }
 
         void Run()
