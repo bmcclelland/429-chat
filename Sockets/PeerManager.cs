@@ -43,6 +43,7 @@ namespace Sockets
                 {
                     string s = peer.receiveString.ToString();
                     Console.WriteLine(String.Format("Read {0} byte from socket" + "data = {1} ", s.Length, s));
+                    peer.receiveString.Clear();
                 }
             }
             peer.BeginReceive(new AsyncCallback(OnReceive));
