@@ -10,7 +10,6 @@ namespace Sockets
         PeerManager peers = new PeerManager();
         Socket listenSocket;
         int localPort;
-        public string serverIP { get { return IPAddress.Any.ToString(); } }
         
         public Server(int port)
         {
@@ -37,6 +36,19 @@ namespace Sockets
             Console.WriteLine("Listening");
 
             Console.WriteLine("Listening on " + IPAddress.Any.ToString() + ":" + localPort);
+
+            for(int i = 0; i < 5; i++)
+            {
+                peers.AddPeer
+                    (
+                    new Socket
+                    (
+                        new IPEndPoint(IPAddress.Parse("192.168.1." + i), (5550+i))
+                        .AddressFamily, SocketType.Stream, ProtocolType.Tcp
+                    )
+                    );
+            }
+            
 
             string line = "";
             do
@@ -87,7 +99,7 @@ namespace Sockets
                         }
                     case "list":
                         {
-                            Console.WriteLine("Show all connected peers");
+                            Console.WriteLine(peers.GetPeers());
                             break;
                         }
                     case var val when new Regex(@"^terminate\s+(\d{1})$").IsMatch(val):
