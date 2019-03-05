@@ -8,16 +8,18 @@ namespace Sockets
 {
     class Peer
     {
-        public const int BUFSIZE = 1024;
-        public const SocketFlags SOCKETFLAGS = SocketFlags.None;
+        public int id;
+        public string address;
 
-        public Socket socket;
-        public byte[] receiveBuf = new byte[BUFSIZE];
-        public StringBuilder receiveString = new StringBuilder();
-
-        public void BeginReceive(AsyncCallback callback)
+        public Peer(int id, string address)
         {
-            socket.BeginReceive(receiveBuf, 0, BUFSIZE, SOCKETFLAGS, callback, this);
+            this.id = id;
+            this.address = address;
+        }
+
+        public static int CompareById(Peer a, Peer b)
+        {
+            return a.id.CompareTo(b.id);
         }
     }
 
@@ -25,37 +27,13 @@ namespace Sockets
     {
         Mutex peerMutex = new Mutex();
         int nextPeerID = 0;
-        Dictionary<int,Peer> peers = new Dictionary<int,Peer>();
-
-        private void OnReceive(IAsyncResult result)
-        {
-            Peer peer = (Peer)result.AsyncState;
-            int read = peer.socket.EndReceive(result);
-
-            if (read > 0)
-            {
-                peer.receiveString.Append(Encoding.ASCII.GetString(peer.receiveBuf, 0, read));
-                
-            }
-            else
-            {
-                if (peer.receiveString.Length > 1)
-                {
-                    string s = peer.receiveString.ToString();
-                    Console.WriteLine(String.Format("Read {0} byte from socket" + "data = {1} ", s.Length, s));
-                }
-            }
-            peer.BeginReceive(new AsyncCallback(OnReceive));
-        }
+        Dictionary<int,Socket> peers = new Dictionary<int,Socket>();
 
         public void AddPeer(Socket peerSocket)
         {
             peerMutex.WaitOne();
-            Peer peer = new Peer();
-            peer.socket = peerSocket;
-            peers.Add(nextPeerID, peer);
+            peers.Add(nextPeerID, peerSocket);
             nextPeerID++;
-            peer.BeginReceive(new AsyncCallback(OnReceive));
             peerMutex.ReleaseMutex();
         }
 
@@ -67,9 +45,8 @@ namespace Sockets
 
             if (peers.ContainsKey(id))
             {
-                Peer peer = peers[id];
-                Socket socket = peer.socket;
-                byte[] bytes = ToByteString(message);
+                var socket = peers[id];
+                var bytes = toByteString(message);
                 socket.Send(bytes);
             }
      
@@ -77,32 +54,27 @@ namespace Sockets
 
         }
 
-        private static byte[] ToByteString(string s)
+        private static Byte[] toByteString(string s)
         {
             Encoding e = new ASCIIEncoding();
             return e.GetBytes(s);
         }
 
-        private static int CompareById(Tuple<int,string> a, Tuple<int,string> b)
-        {
-            return a.Item1.CompareTo(b.Item1);
-        }
-
         // Returns a list of Peers sorted by id.
-        public List<Tuple<int,string>> GetPeerList()
+        public List<Peer> GetPeers()
         {
-            List<Tuple<int,string>> result = new List<Tuple<int,string>>();
+            List<Peer> result = new List<Peer>();
             peerMutex.WaitOne();
                       
             foreach (var kv in peers)
             {
                 var id = kv.Key;
-                var address = kv.Value.socket.RemoteEndPoint.ToString();
-                result.Add(Tuple.Create(id, address));
+                var address = kv.Value.RemoteEndPoint.ToString();
+                result.Add(new Peer(id, address));
             }
 
             peerMutex.ReleaseMutex();
-            result.Sort(CompareById);
+            result.Sort(Peer.CompareById);
             return result;
         }
 
@@ -114,8 +86,8 @@ namespace Sockets
 
             if (peers.ContainsKey(id))
             {
-                var peer = peers[id];
-                peer.socket.Close();
+                var socket = peers[id];
+                socket.Close();
                 peers.Remove(id);
             }
 
