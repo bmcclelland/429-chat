@@ -10,30 +10,17 @@ namespace Sockets
             foreach(string arg in args)
                 Console.WriteLine(arg);
 
-            Server app = new Server(8000);
-
-            Console.WriteLine("Listening on " /*+ IPAddress.Any.ToString()*/ + ":" + app.LocalPort);
-
-            string line = "";
-            while ((line = Console.ReadLine()) != null)
-            {
-                Console.WriteLine("");
-
-                switch (line)
+            try {
+                int port = Int32.Parse(args[0]);
+                if(args[0].Length != 4)
                 {
-                    case "help":
-                        Console.WriteLine("Option " + line);
-                        break;
-                    case "myip":
-                        Console.WriteLine("Option " + line);
-                        break;
-                    case "myport":
-                        Console.WriteLine("Option " + app.LocalPort);
-                        break;
-                    default:
-                        Console.WriteLine("You dun scrued up...");
-                        break;
+                    Console.WriteLine("Port must be 4 digits");
+                    return;
                 }
+                Server app = new Server(port);
+            } catch (FormatException)
+            {
+                Console.WriteLine($"Unable to parse '{args[0]}'");
             }
         }
     }
