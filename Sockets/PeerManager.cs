@@ -71,13 +71,13 @@ namespace Sockets
                     }
                     peer.BeginReceive(new AsyncCallback(OnReceive), id);
                 }
-            } catch (System.Net.Sockets.SocketException e)
+            } catch (System.Net.Sockets.SocketException)
             {
                 TerminatePeer(id);
-                Console.WriteLine("client id " + id + " closed connection.");
-            } catch (System.ObjectDisposedException e)
+                Console.WriteLine("Peer with id " + id + " closed connection.");
+            } catch (System.ObjectDisposedException)
             {
-                Console.WriteLine("client id " + id + " closed connection.");
+                Console.WriteLine("Peer with id " + id + " closed connection.");
             }
         }
 
@@ -99,9 +99,10 @@ namespace Sockets
         }
 
         // Sends message to peer with given id. 
-        // If no such peer, nothing happens.
-        public void SendToPeer(int id, string message)
+        // If no such peer, prints error.
+        public bool SendToPeer(int id, string message)
         {
+            bool result;
             peerMutex.WaitOne();
 
             if (peers.ContainsKey(id))
@@ -109,11 +110,27 @@ namespace Sockets
                 Peer peer = peers[id];
                 Socket socket = peer.socket;
                 byte[] bytes = ToByteString(message);
-                socket.Send(bytes);
+
+                try
+                {
+                    socket.Send(bytes);
+                    result = true;
+                }
+                catch (System.Net.Sockets.SocketException e)
+                {
+                    TerminatePeer(id);
+                    Console.WriteLine("Error: " + e.Message + " when sending to peer with id " + id.ToString());
+                    result = false;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Error: no peer with id " + id.ToString());
+                result = false;
             }
      
             peerMutex.ReleaseMutex();
-
+            return result;
         }
 
         private static byte[] ToByteString(string s)
@@ -147,9 +164,10 @@ namespace Sockets
         }
 
         // Closes the connection with given peer id.
-        // If no such peer, does nothing.
-        public void TerminatePeer(int id)
+        // If no such peer, prints error.
+        public bool TerminatePeer(int id)
         {
+            bool result;
             peerMutex.WaitOne();
 
             if (peers.ContainsKey(id))
@@ -157,9 +175,16 @@ namespace Sockets
                 var peer = peers[id];
                 peer.socket.Close();
                 peers.Remove(id);
+                result = true;
+            }
+            else
+            {
+                Console.WriteLine("Error: no peer with id " + id.ToString());
+                result = false;
             }
 
             peerMutex.ReleaseMutex();
+            return result;
         }
     }
 }

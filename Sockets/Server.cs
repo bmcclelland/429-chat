@@ -20,9 +20,8 @@ namespace Sockets
         void OnIncomingConnect(IAsyncResult result)
         {
             Socket peerSocket = listenSocket.EndAccept(result);
-            Console.WriteLine("onIncomingConnect " + peerSocket.RemoteEndPoint.ToString());
             peerManager.AddPeer(peerSocket);
-            Console.WriteLine("added peer " + peerSocket.RemoteEndPoint.ToString());
+            Console.WriteLine("Connection from " + Util.SocketRemoteIP(peerSocket));
             var callback = new AsyncCallback(OnIncomingConnect);
             listenSocket.BeginAccept(callback, listenSocket);
         }
@@ -99,8 +98,9 @@ namespace Sockets
                         {
                             var m = new Regex(@"^terminate\s+(\d{1})$").Match(line);
                             int id = Int32.Parse(m.Groups[1].Captures[0].Value);
-                            Console.WriteLine($"teminating connection {id}");
-                            peerManager.TerminatePeer(id);
+                            
+                            if (peerManager.TerminatePeer(id))
+                                Console.WriteLine("Terminated peer with id " + id.ToString());
                             break;
                         }
                     case var val when new Regex(@"^send\s+(\d{1})\s+(.+)$").IsMatch(val):
@@ -108,8 +108,16 @@ namespace Sockets
                             var m = new Regex(@"^send\s+(\d{1})\s+(.+)$").Match(line);
                             int id = Int32.Parse(m.Groups[1].Captures[0].Value);
                             string msg = m.Groups[2].Captures[0].Value;
-                            Console.WriteLine($"sending {msg} to id {id}");
-                            peerManager.SendToPeer(id, msg);
+
+                            if (msg.Length > 100)
+                            {
+                                Console.WriteLine("Error: message must be 100 characters or less");
+                            }
+                            else
+                            {
+                                if (peerManager.SendToPeer(id, msg))
+                                    Console.WriteLine("Message sent to peer with id " + id.ToString());
+                            }
                             break;
                         }
                     case "exit":
