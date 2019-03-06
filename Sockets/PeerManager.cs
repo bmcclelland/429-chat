@@ -27,6 +27,16 @@ namespace Sockets
         int nextPeerID = 0;
         Dictionary<int,Peer> peers = new Dictionary<int,Peer>();
 
+        public bool HasPeer(string ipaddress, int port)
+        {
+            foreach((int id, string ip, int po) in GetPeerList())
+            {
+                if (ipaddress == ip && port == po)
+                    return true;
+            }
+            return false;
+        }
+
         private void PrintMessage(Peer peer)
         {
             string address = Util.SocketRemoteIP(peer.socket);

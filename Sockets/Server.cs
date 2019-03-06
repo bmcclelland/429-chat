@@ -85,8 +85,17 @@ namespace Sockets
                             var m = new Regex(@"^connect\s+(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})\s+(\d{1,5})$").Match(line);
                             string address = m.Groups[1].Captures[0].Value;
                             int port = Int32.Parse(m.Groups[2].Captures[0].Value);
-                            Console.WriteLine($"connecting to {address}:{port}...");
-                            peerManager.ConnectPeer(address, port);
+                            if((address == Util.GetLocalIPAddress() || address == "127.0.0.1") && port == localPort)
+                            {
+                                Console.WriteLine("Cannot connect to yourself.");
+                            } else if (peerManager.HasPeer(address, port))
+                            {
+                                Console.WriteLine("Connection already exists.");
+                            } else
+                            {
+                                Console.WriteLine($"connecting to {address}:{port}...");
+                                peerManager.ConnectPeer(address, port);
+                            }
                             break;
                         }
                     case "list":
