@@ -1,10 +1,12 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Sockets;
 
 namespace Sockets
 {
     class Util
     {
+        
         public static string SocketLocalIP(Socket socket)
         {
             IPEndPoint ep = socket.LocalEndPoint as IPEndPoint;
@@ -17,6 +19,19 @@ namespace Sockets
             {
                 return ep.Address.MapToIPv4().ToString();
             }
+        }
+
+        public static string GetLocalIPAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("No network adapters with an IPv4 address in the system!");
         }
 
         public static string SocketRemoteIP(Socket socket)

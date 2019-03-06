@@ -20,7 +20,7 @@ namespace Sockets
                 Server app = new Server(port);
             } catch (FormatException)
             {
-                Console.WriteLine($"Unable to parse '{args[0]}'");
+                Console.WriteLine($"Unable to parse port argument: '{args[0]}'");
             }
         }
     }

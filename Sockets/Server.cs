@@ -72,19 +72,19 @@ namespace Sockets
                         }
                     case "myip":
                         {
-                            Console.WriteLine("Option " + line);
+                            Console.WriteLine(Util.GetLocalIPAddress());
                             break;
                         }
                     case "myport":
                         {
-                            Console.WriteLine("Option " + localPort);
+                            Console.WriteLine(localPort);
                             break;
                         }
                     case var val when new Regex(@"^connect\s+(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})\s+(\d{1,5})$").IsMatch(val):
                         {
                             var m = new Regex(@"^connect\s+(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})\s+(\d{1,5})$").Match(line);
-                            string address = m.Groups[0].Captures[0].Value;
-                            int port = Int32.Parse(m.Groups[1].Captures[0].Value);
+                            string address = m.Groups[1].Captures[0].Value;
+                            int port = Int32.Parse(m.Groups[2].Captures[0].Value);
                             Console.WriteLine($"connecting to {address}:{port}");
                             peerManager.ConnectPeer(address, port);
                             break;
@@ -102,10 +102,9 @@ namespace Sockets
                             Console.WriteLine($"teminating connection {id}");
                             break;
                         }
-                    case var val when new Regex(@"^send\s+(\d{1})\s+(\w+)$").IsMatch(val):
+                    case var val when new Regex(@"^send\s+(\d{1})\s+(.+)$").IsMatch(val):
                         {
-                            var m = new Regex(@"^send\s+(\d{1})\s+(\w+)$").Match(line);
-                            //Console.WriteLine(m.Groups[0].Captures[0].Value);
+                            var m = new Regex(@"^send\s+(\d{1})\s+(.+)$").Match(line);
                             int id = Int32.Parse(m.Groups[1].Captures[0].Value);
                             string msg = m.Groups[2].Captures[0].Value;
                             Console.WriteLine($"sending {msg} to id {id}");
@@ -115,7 +114,11 @@ namespace Sockets
                     case "exit":
                         {
                             Console.WriteLine("All connections closing, good bye...");
-                            // TODO: close connections
+                            foreach((int id, string address, int port) in peerManager.GetPeerList())
+                            {
+                                peerManager.TerminatePeer(id);
+                            }
+                            Console.WriteLine("Terminating connections");
                             return;
                         }
                     default:

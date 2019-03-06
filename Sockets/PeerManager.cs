@@ -35,7 +35,7 @@ namespace Sockets
             if (read > 0)
             {
                 peer.receiveString.Append(Encoding.ASCII.GetString(peer.receiveBuf, 0, read));
-                
+                Console.WriteLine("Getting msg!");
             }
             else
             {
