@@ -27,6 +27,16 @@ namespace Sockets
         int nextPeerID = 0;
         Dictionary<int,Peer> peers = new Dictionary<int,Peer>();
 
+        public bool HasPeer(string ipaddress, int port)
+        {
+            foreach((int id, string ip, int po) in GetPeerList())
+            {
+                if (ipaddress == ip && port == po)
+                    return true;
+            }
+            return false;
+        }
+
         private void PrintMessage(Peer peer)
         {
             string address = Util.SocketRemoteIP(peer.socket);
@@ -84,8 +94,15 @@ namespace Sockets
         public void ConnectPeer(string ipaddress, int port)
         {
             Socket peer = Util.CreateSocket();
-            peer.Connect(ipaddress, port);
-            AddPeer(peer);
+            try 
+            {
+                peer.Connect(ipaddress, port);
+                AddPeer(peer);
+                Console.WriteLine("Connected!");
+            } catch(System.Net.Sockets.SocketException e)
+            {
+                Console.WriteLine("Error on connect, invalid IP/port");
+            }
         }
 
         public void AddPeer(Socket peerSocket)
