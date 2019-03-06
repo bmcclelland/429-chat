@@ -15,9 +15,9 @@ namespace Sockets
         public byte[] receiveBuf = new byte[BUFSIZE];
         public StringBuilder receiveString = new StringBuilder();
 
-        public void BeginReceive(AsyncCallback callback)
+        public void BeginReceive(AsyncCallback callback, int id)
         {
-            socket.BeginReceive(receiveBuf, 0, BUFSIZE, SOCKETFLAGS, callback, this);
+            socket.BeginReceive(receiveBuf, 0, BUFSIZE, SOCKETFLAGS, callback, (this, id));
         }
     }
 
@@ -29,24 +29,30 @@ namespace Sockets
 
         private void OnReceive(IAsyncResult result)
         {
-            Peer peer = (Peer)result.AsyncState;
-            int read = peer.socket.EndReceive(result);
+            (Peer peer, int id) = ((Peer, int))(result.AsyncState);
+            try {
+                int read = peer.socket.EndReceive(result);
 
-            if (read > 0)
-            {
-                peer.receiveString.Append(Encoding.ASCII.GetString(peer.receiveBuf, 0, read));
-                Console.WriteLine("Getting msg!");
-            }
-            else
-            {
-                if (peer.receiveString.Length > 1)
+                if (read > 0)
                 {
-                    string s = peer.receiveString.ToString();
-                    Console.WriteLine(String.Format("Read {0} byte from socket" + "data = {1} ", s.Length, s));
-                    peer.receiveString.Clear();
+                    peer.receiveString.Append(Encoding.ASCII.GetString(peer.receiveBuf, 0, read));
+                    Console.WriteLine("Getting msg!");
                 }
+                else
+                {
+                    if (peer.receiveString.Length > 1)
+                    {
+                        string s = peer.receiveString.ToString();
+                        Console.WriteLine(String.Format("Read {0} byte from socket" + "data = {1} ", s.Length, s));
+                        peer.receiveString.Clear();
+                    }
+                }
+                peer.BeginReceive(new AsyncCallback(OnReceive), id);
+            } catch (System.Net.Sockets.SocketException e)
+            {
+                TerminatePeer(id);
+                Console.WriteLine("client id " + id + " closed connection.");
             }
-            peer.BeginReceive(new AsyncCallback(OnReceive));
         }
 
         public void ConnectPeer(string ipaddress, int port)
@@ -62,8 +68,7 @@ namespace Sockets
             Peer peer = new Peer();
             peer.socket = peerSocket;
             peers.Add(nextPeerID, peer);
-            nextPeerID++;
-            peer.BeginReceive(new AsyncCallback(OnReceive));
+            peer.BeginReceive(new AsyncCallback(OnReceive), nextPeerID++);
             peerMutex.ReleaseMutex();
         }
 

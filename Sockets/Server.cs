@@ -98,8 +98,9 @@ namespace Sockets
                     case var val when new Regex(@"^terminate\s+(\d{1})$").IsMatch(val):
                         {
                             var m = new Regex(@"^terminate\s+(\d{1})$").Match(line);
-                            int id = Int32.Parse(m.Groups[0].Captures[0].Value);
+                            int id = Int32.Parse(m.Groups[1].Captures[0].Value);
                             Console.WriteLine($"teminating connection {id}");
+                            peerManager.TerminatePeer(id);
                             break;
                         }
                     case var val when new Regex(@"^send\s+(\d{1})\s+(.+)$").IsMatch(val):
