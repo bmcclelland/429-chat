@@ -27,6 +27,18 @@ namespace Sockets
         int nextPeerID = 0;
         Dictionary<int,Peer> peers = new Dictionary<int,Peer>();
 
+        private void PrintMessage(Peer peer)
+        {
+            string address = Util.SocketRemoteIP(peer.socket);
+            int port = Util.SocketRemotePort(peer.socket);
+            string message = peer.receiveString.ToString();
+            peer.receiveString.Clear();
+            Console.WriteLine(String.Format(
+                "Message received from {0}\nSender's Port: {1}\nMessage: \"{2}\"", 
+                address, port, message
+                ));
+        }
+
         private void OnReceive(IAsyncResult result)
         {
             Peer peer = (Peer)result.AsyncState;
@@ -35,15 +47,17 @@ namespace Sockets
             if (read > 0)
             {
                 peer.receiveString.Append(Encoding.ASCII.GetString(peer.receiveBuf, 0, read));
-                Console.WriteLine("Getting msg!");
+
+                if (read != Peer.BUFSIZE)
+                {
+                    PrintMessage(peer);
+                }
             }
             else
             {
                 if (peer.receiveString.Length > 1)
                 {
-                    string s = peer.receiveString.ToString();
-                    Console.WriteLine(String.Format("Read {0} byte from socket" + "data = {1} ", s.Length, s));
-                    peer.receiveString.Clear();
+                    PrintMessage(peer);
                 }
             }
             peer.BeginReceive(new AsyncCallback(OnReceive));
