@@ -79,21 +79,32 @@ namespace Sockets
                             Console.WriteLine(localPort);
                             break;
                         }
-                    case var val when new Regex(@"^connect\s+(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})\s+(\d{1,5})$").IsMatch(val):
+                    case var val when new Regex(@"^connect\s+(.+)\s+(.+)$").IsMatch(val):
                         {
-                            var m = new Regex(@"^connect\s+(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})\s+(\d{1,5})$").Match(line);
+                            var m = new Regex(@"^connect\s+(.+)\s+(.+)$").Match(line);
                             string address = m.Groups[1].Captures[0].Value;
-                            int port = Int32.Parse(m.Groups[2].Captures[0].Value);
-                            if((address == Util.GetLocalIPAddress() || address == "127.0.0.1") && port == localPort)
+
+                            try
                             {
-                                Console.WriteLine("Cannot connect to yourself.");
-                            } else if (peerManager.HasPeer(address, port))
+                                int port = Int32.Parse(m.Groups[2].Captures[0].Value);
+
+                                if ((address == Util.GetLocalIPAddress() || address == "127.0.0.1") && port == localPort)
+                                {
+                                    Console.WriteLine("Cannot connect to yourself.");
+                                }
+                                else if (peerManager.HasPeer(address, port))
+                                {
+                                    Console.WriteLine("Connection already exists.");
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"connecting to {address}:{port}...");
+                                    peerManager.ConnectPeer(address, port);
+                                }
+                            }
+                            catch (Exception)
                             {
-                                Console.WriteLine("Connection already exists.");
-                            } else
-                            {
-                                Console.WriteLine($"connecting to {address}:{port}...");
-                                peerManager.ConnectPeer(address, port);
+                                Console.WriteLine("Error: invalid IP/port");
                             }
                             break;
                         }

@@ -101,7 +101,7 @@ namespace Sockets
                 Console.WriteLine("Connected!");
             } catch(System.Net.Sockets.SocketException e)
             {
-                Console.WriteLine("Error on connect, invalid IP/port");
+                Console.WriteLine("Error: invalid IP/port");
             }
         }
 
