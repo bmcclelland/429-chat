@@ -12,11 +12,6 @@ namespace Sockets
 
             try {
                 int port = Int32.Parse(args[0]);
-                if(args[0].Length != 4)
-                {
-                    Console.WriteLine("Port must be 4 digits");
-                    return;
-                }
                 Server app = new Server(port);
             } catch (FormatException)
             {
