@@ -85,10 +85,10 @@ namespace Sockets
                     case var val when new Regex(@"^connect\s+(.+)\s+(.+)$").IsMatch(val):
                         {
                             var m = new Regex(@"^connect\s+(.+)\s+(.+)$").Match(line);
-                            string address = m.Groups[1].Captures[0].Value;
 
                             try
                             {
+                                string address = m.Groups[1].Captures[0].Value;
                                 int port = Int32.Parse(m.Groups[2].Captures[0].Value);
 
                                 if ((address == Util.GetLocalIPAddress() || address == "127.0.0.1") && port == localPort)
