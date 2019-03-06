@@ -75,6 +75,9 @@ namespace Sockets
             {
                 TerminatePeer(id);
                 Console.WriteLine("client id " + id + " closed connection.");
+            } catch (System.ObjectDisposedException e)
+            {
+                Console.WriteLine("client id " + id + " closed connection.");
             }
         }
 
