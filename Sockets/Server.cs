@@ -39,9 +39,12 @@ namespace Sockets
             Console.WriteLine("Listening on " + IPAddress.Any.ToString() + ":" + localPort);            
 
             string line = "";
-            do
+
+            Console.WriteLine("Type [Help] for a list of commands...\n");
+
+            while ((line = Console.ReadLine()) != null)
             {
-                Console.WriteLine("");
+                Console.WriteLine();
 
                 switch (line)
                 {
@@ -142,11 +145,12 @@ namespace Sockets
                         }
                     default:
                         {
-                            Console.WriteLine("Type [help] for a list of commands...");
+                            Console.WriteLine("Invalid Command, type [help] for a list of commands...");
                             break;
                         }
                 }
-            } while ((line = Console.ReadLine()) != null);
+                Console.WriteLine();
+            }
         }
     }
 }
