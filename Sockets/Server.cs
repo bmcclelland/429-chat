@@ -85,7 +85,7 @@ namespace Sockets
                             var m = new Regex(@"^connect\s+(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})\s+(\d{1,5})$").Match(line);
                             string address = m.Groups[1].Captures[0].Value;
                             int port = Int32.Parse(m.Groups[2].Captures[0].Value);
-                            Console.WriteLine($"connecting to {address}:{port}");
+                            Console.WriteLine($"connecting to {address}:{port}...");
                             peerManager.ConnectPeer(address, port);
                             break;
                         }
@@ -99,7 +99,7 @@ namespace Sockets
                         {
                             var m = new Regex(@"^terminate\s+(\d{1})$").Match(line);
                             int id = Int32.Parse(m.Groups[1].Captures[0].Value);
-                            Console.WriteLine($"teminating connection {id}");
+                            Console.WriteLine($"teminating connection {id}...");
                             peerManager.TerminatePeer(id);
                             break;
                         }
@@ -108,7 +108,7 @@ namespace Sockets
                             var m = new Regex(@"^send\s+(\d{1})\s+(.+)$").Match(line);
                             int id = Int32.Parse(m.Groups[1].Captures[0].Value);
                             string msg = m.Groups[2].Captures[0].Value;
-                            Console.WriteLine($"sending {msg} to id {id}");
+                            Console.WriteLine($"sending {msg} to id {id}...");
                             peerManager.SendToPeer(id, msg);
                             break;
                         }

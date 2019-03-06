@@ -84,8 +84,15 @@ namespace Sockets
         public void ConnectPeer(string ipaddress, int port)
         {
             Socket peer = Util.CreateSocket();
-            peer.Connect(ipaddress, port);
-            AddPeer(peer);
+            try 
+            {
+                peer.Connect(ipaddress, port);
+                AddPeer(peer);
+                Console.WriteLine("Connected!");
+            } catch(System.Net.Sockets.SocketException e)
+            {
+                Console.WriteLine("Error on connect, invalid IP/port");
+            }
         }
 
         public void AddPeer(Socket peerSocket)
