@@ -63,6 +63,8 @@ namespace Sockets
                     {
                         PrintMessage(peer);
                     }
+
+                    peer.BeginReceive(new AsyncCallback(OnReceive), id);
                 }
                 else
                 {
@@ -79,7 +81,9 @@ namespace Sockets
                             peer.receiveString.Clear();
                         }
                     }
-                    peer.BeginReceive(new AsyncCallback(OnReceive), id);
+
+                    TerminatePeer(id);
+                    Console.WriteLine("Peer with id " + id + " closed connection.");                 
                 }
             } catch (System.Net.Sockets.SocketException)
             {

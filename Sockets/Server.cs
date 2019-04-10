@@ -34,13 +34,12 @@ namespace Sockets
             listenSocket.Listen(10);
             var callback = new AsyncCallback(OnIncomingConnect);
             listenSocket.BeginAccept(callback, listenSocket);
-            Console.WriteLine("Listening");
-
-            Console.WriteLine("Listening on " + IPAddress.Any.ToString() + ":" + localPort);            
+           
+     //       Console.WriteLine("Listening on " + IPAddress.Any.ToString() + ":" + localPort);            
 
             string line = "";
 
-            Console.WriteLine("Type [Help] for a list of commands...\n");
+            Console.WriteLine("Type [help] for a list of commands...\n");
 
             while ((line = Console.ReadLine()) != null)
             {
@@ -51,25 +50,32 @@ namespace Sockets
                     case "help":
                         {
                             Console.WriteLine("Commands:\n" +
-                                "[myip]:\n" +
-                                " Display the IP address of this process.\n" +
-                                "[myport]:\n" +
-                                " Display the port on which this process is listening for\n" +
-                                " incoming connections.\n" +
-                                "[connect <destination> <port no>]:\n" +
-                                " new TCP connection to <destination>\n" +
-                                "at the specified <port no>.\n" +
-                                "[list]:\n" +
-                                " Display a numbered list of all connections to this client.\n" +
-                                "[terminate <connection id>]:\n" +
-                                " This command will terminate the connection\n" +
-                                "listed under the specified number when LIST is used to display all\n" +
-                                "connections.\n" +
-                                "[send <connection id> <message>]:\n" +
-                                " This will send the message to the\n" +
-                                "host on the connection that is designated by the id.\n" +
-                                "[exit]:\n" +
-                                " Close all connections and terminate this process.\n");
+                                "\n" +
+                                "myip:\n" +
+                                "\tDisplay the IP address of this process.\n" +
+                                "\n" +
+                                "myport:\n" +
+                                "\tDisplay the port on which this process is listening for\n" +
+                                "\tincoming connections.\n" +
+                                "\n" +
+                                "connect <destination> <port no>:\n" +
+                                "\tnew TCP connection to <destination>\n" +
+                                "\tat the specified <port no>.\n" +
+                                "\n" +
+                                "list:\n" +
+                                "\tDisplay a numbered list of all connections to this client.\n" +
+                                "\n" +
+                                "terminate <connection id>:\n" +
+                                "\tThis command will terminate the connection\n" +
+                                "\tlisted under the specified number when LIST is used to display all\n" +
+                                "\tconnections.\n" +
+                                "\n" +
+                                "send <connection id> <message>:\n" +
+                                "\tThis will send the message to the\n" +
+                                "\thost on the connection that is designated by the id.\n" +
+                                "\n" +
+                                "exit:\n" +
+                                "\tClose all connections and terminate this process.\n");
                             break;
                         }
                     case "myip":
@@ -93,11 +99,11 @@ namespace Sockets
 
                                 if ((address == Util.GetLocalIPAddress() || address == "127.0.0.1") && port == localPort)
                                 {
-                                    Console.WriteLine("Cannot connect to yourself.");
+                                    Console.WriteLine("Error: Cannot connect to yourself.");
                                 }
                                 else if (peerManager.HasPeer(address, port))
                                 {
-                                    Console.WriteLine("Connection already exists.");
+                                    Console.WriteLine("Error: Connection already exists.");
                                 }
                                 else
                                 {
@@ -113,8 +119,19 @@ namespace Sockets
                         }
                     case "list":
                         {
-                            foreach((int id, string address, int port) in peerManager.GetPeerList())
-                                Console.WriteLine(id + " " + address + " " + port);
+                            var peers = peerManager.GetPeerList();
+
+                            if (peers.Count == 0)
+                            {
+                                Console.WriteLine("No connected peers.");
+                            }
+                            else
+                            {
+                                foreach ((int id, string address, int port) in peerManager.GetPeerList())
+                                {
+                                    Console.WriteLine(id + " " + address + " " + port);
+                                }
+                            }
                             break;
                         }
                     case var val when new Regex(@"^terminate\s+(\d{1})$").IsMatch(val):
@@ -156,7 +173,7 @@ namespace Sockets
                         }
                     default:
                         {
-                            Console.WriteLine("Invalid Command, type [help] for a list of commands...");
+                            Console.WriteLine("Error: Invalid Command, type [help] for a list of commands...");
                             break;
                         }
                 }
